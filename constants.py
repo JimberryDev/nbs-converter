@@ -101,6 +101,7 @@ NOTES_TO_DISCS_UNNAMED = [
   '"minecraft:music_disc_11"',
   '"minecraft:music_disc_wait"',
   '"minecraft:music_disc_pigstep"',
+  '"minecraft:music_disc_otherside"', # Silence
 ]
 
 # DO NOT EDIT
@@ -119,4 +120,5 @@ NOTES_TO_DISCS_NAMED = [
   '"minecraft:music_disc_11",tag:{display:{Name:\'{"text":"E"}\'}}',
   '"minecraft:music_disc_wait",tag:{display:{Name:\'{"text":"F"}\'}}',
   '"minecraft:music_disc_pigstep",tag:{display:{Name:\'{"text":"F#"}\'}}',
+  '"minecraft:music_disc_otherside",tag:{display:{Name:\'{"text":"Silence"}\'}}', # Silence
 ]
