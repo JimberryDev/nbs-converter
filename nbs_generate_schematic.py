@@ -2,6 +2,7 @@ import pynbs
 import sys
 import numpy
 import mcschematic
+import os
 from constants import *
 
 
@@ -81,11 +82,11 @@ def removeEmptyChests(chestContents):
 
 
 def newDisc(slot, note):
-  if note == -1:
-    return '{Count:1b,Slot:' + str(slot) + 'b,id:"minecraft:wooden_shovel"}'
-
   if note >= 12:
     note -= 12
+
+  if note == -1:
+    note = 13
 
   disc = NOTES_TO_DISCS_NAMED[note] if NAME_DISCS else NOTES_TO_DISCS_UNNAMED[note]
   return '{Count:1b,Slot:' + str(slot) + 'b,id:' + disc + '}'
@@ -107,12 +108,12 @@ def createChest(type_, contents):
   if len(contents) > 0:
     contents = contents[:len(contents) - 1]
 
-  return 'minecraft:chest[facing=south,type=' + type_ + ']{Items:[' + contents + ']}'
+  return 'minecraft:chest[facing=west,type=' + type_ + ']{Items:[' + contents + ']}'
 
 
 def createSign(instrument, currentModule, octave):
   octaveMessage = 'lower octave' if octave == 0 else 'upper octave'
-  return 'minecraft:oak_wall_sign[facing=south,waterlogged=false]{front_text:{color:"black",has_glowing_text:0b,messages:[\'{"text":"' + instrument + ' ' + str(
+  return 'minecraft:oak_wall_sign[facing=north,waterlogged=false]{front_text:{color:"black",has_glowing_text:0b,messages:[\'{"text":"' + instrument + ' ' + str(
     currentModule) + '"}\',\'{"text":"' + octaveMessage + '"}\',\'{"text":""}\',\'{"text":""}\']},is_waxed:0b}'
 
 
@@ -124,7 +125,7 @@ def main():
 
   try:
     song = pynbs.read(songFile)
-    songName = songFile[:-4]
+    songName = os.path.splitext(os.path.basename(songFile))[0]
   except Exception as e:
     sys.exit(f'An error occurred while reading the song file "{songFile}".\nError name: {e.__class__.__name__}\nExact error (search this up for help): {e}')
 
@@ -220,29 +221,30 @@ def main():
       if not lowerOctaveEmpty:
         lowerChest1 = createChest('right', lowerChest1)
         lowerChest2 = createChest('left', lowerChest2)
-        schem.setBlock((offset, 0, -1), lowerChest1)
-        schem.setBlock((offset + 1, 0, -1), lowerChest2)
         schem.setBlock((offset, 0, 0), createSign(instrument, currentModule, 0))
+        schem.setBlock((offset, 0, 1), lowerChest1)
+        schem.setBlock((offset, 0, 2), lowerChest2)
       else:
-        schem.setBlock((offset, 0, -1), "minecraft:air")
-        schem.setBlock((offset + 1, 0, -1), "minecraft:air")
         schem.setBlock((offset, 0, 0), "minecraft:air")
+        schem.setBlock((offset, 0, 1), "minecraft:air")
+        schem.setBlock((offset, 0, 2), "minecraft:air")
 
       if not upperOctaveEmpty:
         upperChest1 = createChest('right', upperChest1)
         upperChest2 = createChest('left', upperChest2)
-        schem.setBlock((offset, 1, -1), upperChest1)
-        schem.setBlock((offset + 1, 1, -1), upperChest2)
-        schem.setBlock((offset, 1, 0), createSign(instrument, currentModule, 1))
+        schem.setBlock((offset+1, 0, 0), createSign(instrument, currentModule, 1))
+        schem.setBlock((offset+1, 0, 1), upperChest1)
+        schem.setBlock((offset+1, 0, 2), upperChest2)
       else:
-        schem.setBlock((offset, 1, -1), "minecraft:air")
-        schem.setBlock((offset + 1, 1, -1), "minecraft:air")
-        schem.setBlock((offset, 1, 0), "minecraft:air")
+        schem.setBlock((offset+1, 0, 0), "minecraft:air")
+        schem.setBlock((offset+1, 0, 1), "minecraft:air")
+        schem.setBlock((offset+1, 0, 2), "minecraft:air")
 
       currentModule += 1
       offset += 2
 
-  saveName = songName.lower().replace('(', '').replace(')', '').replace(' ', '_')
+  saveName = DEFAULT_SCHEM_DIRECTORY + '/' + songName.lower().replace('(', '').replace(')', '').replace(' ', '_')
+  os.makedirs(DEFAULT_SCHEM_DIRECTORY, exist_ok=True)
   schem.save('', saveName, mcschematic.Version.JE_1_20)
   print('Your schematic was successfully generated and saved under "' + saveName + '.schem"')
 

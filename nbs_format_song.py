@@ -1,5 +1,6 @@
 import pynbs
 import sys
+import os
 from constants import *
 
 
@@ -105,7 +106,7 @@ def main():
 
   try:
     song = pynbs.read(songFile)
-    songName = songFile[:-4]
+    songName = os.path.splitext(os.path.basename(songFile))[0]
   except Exception as e:
     sys.exit(f'An error occurred while reading the song file "{songFile}".\nError name: {e.__class__.__name__}\nExact error (search this up for help): {e}')
 
@@ -163,8 +164,10 @@ def main():
     print('Notice: Your song contained chords that were larger than allowed. Some notes were removed from these chords.')
 
   # save the new song
-  newFileName = songName + ' (Formatted).nbs'
+  newFileName = DEFAULT_FORMATTED_DIRECTORY + '/' + songName + ' (Formatted).nbs'
 
+
+  os.makedirs(DEFAULT_FORMATTED_DIRECTORY, exist_ok=True)
   newSong.save(newFileName)
   print(f'Your formatted song was saved under "{newFileName}"')
 

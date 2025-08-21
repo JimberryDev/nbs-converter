@@ -1,3 +1,12 @@
+.vscode
+.idea
+*.nbs
+!example_songs/*.nbs
+*.schem
+*.txt
+out/
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

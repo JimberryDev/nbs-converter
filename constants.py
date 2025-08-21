@@ -52,6 +52,15 @@ KEEP_NOTES_BY_INSTRUMENT = {
   'pling': 'h',
 }
 
+# EDITABLE SETTING
+# The default directory to place the formatted files
+DEFAULT_FORMATTED_DIRECTORY = "out/formatted"
+
+# EDITABLE SETTING
+# The default directory to place the schematic files
+DEFAULT_SCHEM_DIRECTORY = "out/schem"
+
+
 # DO NOT EDIT
 # The maximum length of a song, dictated by the capacity of a double chest
 MAX_SONG_LENGTH = 1457
