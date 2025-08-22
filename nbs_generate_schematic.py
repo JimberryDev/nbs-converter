@@ -98,7 +98,7 @@ def createShulker(currentShulker, contents):
   # remove trailing comma
   contents = contents[:len(contents) - 1]
   return '{Count:1b,Slot:' + str(
-    slot) + 'b,id:"minecraft:shulker_box",tag:{BlockEntityTag:{CustomName:\'{"text":"' + str(
+    slot) + 'b,id:"minecraft:blue_shulker_box",tag:{BlockEntityTag:{CustomName:\'{"text":"' + str(
     currentShulker) + '"}\',Items:[' + contents + '],id:"minecraft:shulker_box"},display:{Name:\'{"text":"' + str(
     currentShulker) + '"}\'}}}'
 
@@ -122,6 +122,12 @@ def main():
   songFile = input('Please enter the file name of your song (include the .nbs): ')
   if not songFile.endswith('.nbs'):
     sys.exit('Your song file must end with ".nbs".')
+
+  separateInTwo = input('Would you like to separate the odd and even ticks into two separate schematics? y/[n]\n') == 'y'
+  if separateInTwo: 
+    print('Separating then')
+  if not separateInTwo: 
+    print('Not separating then')
 
   try:
     song = pynbs.read(songFile)
@@ -163,90 +169,103 @@ def main():
   minimalChestContents = removeEmptyChests(allChestContents)
 
   # turn minimalChestContents into a schematic
-  schem = mcschematic.MCSchematic()
-  offset = 0
-  print('Generating Schematic...')
-  for instrument, contents in minimalChestContents.items():
-    currentModule = 1
+  schems = makeSchematics(songLengthAdjusted, minimalChestContents, separateInTwo)
 
-    for module in contents:
-      lowerChest1 = ''
-      upperChest1 = ''
-      lowerChest2 = ''
-      upperChest2 = ''
-      lowerShulker = ''
-      upperShulker = ''
-      currentShulker = 1
-      lowerOctaveEmpty = len(module[0]) == 0
-      upperOctaveEmpty = len(module[1]) == 0
+  for i, schem in enumerate(schems):
+    saveName = DEFAULT_SCHEM_DIRECTORY + '/' + songName.lower().replace('(', '').replace(')', '').replace(' ', '_')
+    if separateInTwo: saveName += '_' + str(i)
+    os.makedirs(DEFAULT_SCHEM_DIRECTORY, exist_ok=True)
+    schem.save('', saveName, mcschematic.Version.JE_1_20)
+    print('Your schematic was successfully generated and saved under "' + saveName + '.schem"')
 
-      for currentTick in range(songLengthAdjusted):
-        currentSlot = currentTick % 27
+def makeSchematics(songLengthAdjusted, minimalChestContents, separateInTwo = False):
+    schems = list()
+    nSchems = 2 if separateInTwo else 1
+    for i in range(nSchems):
+      schem = mcschematic.MCSchematic()
+      schems.append(schem)
+      offset = 0
+      print('Generating Schematic...')
+      for instrument, contents in minimalChestContents.items():
+        currentModule = 1
 
-        if not lowerOctaveEmpty:
-          lowerShulker += newDisc(currentSlot, module[0][currentTick]) + ','
-
-        if not upperOctaveEmpty:
-          upperShulker += newDisc(currentSlot, module[1][currentTick]) + ','
-
-        # if we are on the last slot of a shulker box, or the song has ended
-        if (currentTick + 1) % 27 == 0 or currentTick == songLengthAdjusted - 1:
-          # turn the shulker contents into actual shulker
-          if not lowerOctaveEmpty:
-            lowerShulker = createShulker(currentShulker, lowerShulker)
-
-          if not upperOctaveEmpty:
-            upperShulker = createShulker(currentShulker, upperShulker)
-
-          # if the current shulker should go in the first chests
-          if currentShulker <= 27:
-            if not lowerOctaveEmpty:
-              lowerChest1 += lowerShulker + ','
-
-            if not upperOctaveEmpty:
-              upperChest1 += upperShulker + ','
-
-          else:
-            if not lowerOctaveEmpty:
-              lowerChest2 += lowerShulker + ','
-
-            if not upperOctaveEmpty:
-              upperChest2 += upperShulker + ','
-
-          # reset the shulkers and increment the current shulker
+        for module in contents:
+          lowerChest1 = ''
+          upperChest1 = ''
+          lowerChest2 = ''
+          upperChest2 = ''
           lowerShulker = ''
           upperShulker = ''
-          currentShulker += 1
+          currentShulker = 1
+          lowerOctaveEmpty = len(module[0]) == 0
+          upperOctaveEmpty = len(module[1]) == 0
 
-      if not lowerOctaveEmpty:
-        lowerChest1 = createChest('right', lowerChest1)
-        lowerChest2 = createChest('left', lowerChest2)
-        schem.setBlock((offset, 0, 0), createSign(instrument, currentModule, 0))
-        schem.setBlock((offset, 0, 1), lowerChest1)
-        schem.setBlock((offset, 0, 2), lowerChest2)
-      else:
-        schem.setBlock((offset, 0, 0), "minecraft:air")
-        schem.setBlock((offset, 0, 1), "minecraft:air")
-        schem.setBlock((offset, 0, 2), "minecraft:air")
+          # Make Boxes
+          for currentTick in range(0 + i, songLengthAdjusted, nSchems):
+            currentSlot = int(currentTick/nSchems) % 27
 
-      if not upperOctaveEmpty:
-        upperChest1 = createChest('right', upperChest1)
-        upperChest2 = createChest('left', upperChest2)
-        schem.setBlock((offset+1, 0, 0), createSign(instrument, currentModule, 1))
-        schem.setBlock((offset+1, 0, 1), upperChest1)
-        schem.setBlock((offset+1, 0, 2), upperChest2)
-      else:
-        schem.setBlock((offset+1, 0, 0), "minecraft:air")
-        schem.setBlock((offset+1, 0, 1), "minecraft:air")
-        schem.setBlock((offset+1, 0, 2), "minecraft:air")
+            if not lowerOctaveEmpty:
+              lowerShulker += newDisc(currentSlot, module[0][currentTick]) + ','
 
-      currentModule += 1
-      offset += 2
+            if not upperOctaveEmpty:
+              upperShulker += newDisc(currentSlot, module[1][currentTick]) + ','
 
-  saveName = DEFAULT_SCHEM_DIRECTORY + '/' + songName.lower().replace('(', '').replace(')', '').replace(' ', '_')
-  os.makedirs(DEFAULT_SCHEM_DIRECTORY, exist_ok=True)
-  schem.save('', saveName, mcschematic.Version.JE_1_20)
-  print('Your schematic was successfully generated and saved under "' + saveName + '.schem"')
+          # if we are on the last slot of a shulker box, or the song has ended
+            if int(currentTick/nSchems + 1) % 27 == 0 or currentTick == songLengthAdjusted - 1:
+            # turn the shulker contents into actual shulker
+              if not lowerOctaveEmpty:
+                lowerShulker = createShulker(currentShulker, lowerShulker)
+
+              if not upperOctaveEmpty:
+                upperShulker = createShulker(currentShulker, upperShulker)
+
+            # if the current shulker should go in the first chests
+              if currentShulker <= 27:
+                if not lowerOctaveEmpty:
+                  lowerChest1 += lowerShulker + ','
+
+                if not upperOctaveEmpty:
+                  upperChest1 += upperShulker + ','
+
+              else:
+                if not lowerOctaveEmpty:
+                  lowerChest2 += lowerShulker + ','
+
+                if not upperOctaveEmpty:
+                  upperChest2 += upperShulker + ','
+
+            # reset the shulkers and increment the current shulker
+              lowerShulker = ''
+              upperShulker = ''
+              currentShulker += 1
+
+
+          # Make chests
+          if not lowerOctaveEmpty:
+            lowerChest1 = createChest('right', lowerChest1)
+            lowerChest2 = createChest('left', lowerChest2)
+            schem.setBlock((offset, 0, 0), createSign(instrument, currentModule, 0))
+            schem.setBlock((offset, 0, 1), lowerChest1)
+            schem.setBlock((offset, 0, 2), lowerChest2)
+          else:
+            schem.setBlock((offset, 0, 0), "minecraft:air")
+            schem.setBlock((offset, 0, 1), "minecraft:air")
+            schem.setBlock((offset, 0, 2), "minecraft:air")
+
+          if not upperOctaveEmpty:
+            upperChest1 = createChest('right', upperChest1)
+            upperChest2 = createChest('left', upperChest2)
+            schem.setBlock((offset+1, 0, 0), createSign(instrument, currentModule, 1))
+            schem.setBlock((offset+1, 0, 1), upperChest1)
+            schem.setBlock((offset+1, 0, 2), upperChest2)
+          else:
+            schem.setBlock((offset+1, 0, 0), "minecraft:air")
+            schem.setBlock((offset+1, 0, 1), "minecraft:air")
+            schem.setBlock((offset+1, 0, 2), "minecraft:air")
+
+          currentModule += 1
+          offset += 2
+    return schems
 
 
 if __name__ == '__main__':
