@@ -131,45 +131,49 @@ def main():
     print('Your song contains custom instruments. All notes using custom instruments will be removed.')
     input('Press Enter to Continue')
 
-  newSong = pynbs.new_file()
-  newSong.header = song.header
-  newSong.layers = song.layers
-  newSong.header.tempo = 5
+  newFileName = format_song(song, songName, settingCompress)
+  print(f'Your formatted song was saved under "{newFileName}"')
 
-  hasMaxChordViolation = False
+def format_song(song, songName, settingCompress):
+    newSong = pynbs.new_file()
+    newSong.header = song.header
+    newSong.layers = song.layers
+    newSong.header.tempo = 5
+
+    hasMaxChordViolation = False
 
   # iterate through the whole song by chords
-  for tick, chord in song:
-    newTick = tick if not settingCompress else tick // 2
+    for tick, chord in song:
+      newTick = tick if not settingCompress else tick // 2
 
-    if newTick > MAX_SONG_LENGTH:
-      print('Notice: Your song was too long, so some had to be cut off the end.')
-      break
+      if newTick > MAX_SONG_LENGTH:
+        print('Notice: Your song was too long, so some had to be cut off the end.')
+        break
 
-    if (tick % 2 != 0 and not settingCompress) or (tick % 2 == 0):
-      chord = removeCustomNotes(chord)
-      chord = fixIllegalNotes(chord)
-      chord, chordViolation = removeChordViolations(chord)
+      if (tick % 2 != 0 and not settingCompress) or (tick % 2 == 0):
+        chord = removeCustomNotes(chord)
+        chord = fixIllegalNotes(chord)
+        chord, chordViolation = removeChordViolations(chord)
 
-      if chordViolation:
-        hasMaxChordViolation = True
+        if chordViolation:
+          hasMaxChordViolation = True
 
-      for note in chord:
-        note.tick = newTick
-        note.panning = 0
-        note.pitch = 0
-        newSong.notes.append(note)
+        for note in chord:
+          note.tick = newTick
+          note.panning = 0
+          note.pitch = 0
+          newSong.notes.append(note)
 
-  if hasMaxChordViolation:
-    print('Notice: Your song contained chords that were larger than allowed. Some notes were removed from these chords.')
+    if hasMaxChordViolation:
+      print('Notice: Your song contained chords that were larger than allowed. Some notes were removed from these chords.')
 
   # save the new song
-  newFileName = DEFAULT_FORMATTED_DIRECTORY + '/' + songName + ' (Formatted).nbs'
+    newFileName = DEFAULT_FORMATTED_DIRECTORY + '/' + songName + ' (Formatted).nbs'
 
 
-  os.makedirs(DEFAULT_FORMATTED_DIRECTORY, exist_ok=True)
-  newSong.save(newFileName)
-  print(f'Your formatted song was saved under "{newFileName}"')
+    os.makedirs(DEFAULT_FORMATTED_DIRECTORY, exist_ok=True)
+    newSong.save(newFileName)
+    return newFileName
 
 
 if __name__ == '__main__':
