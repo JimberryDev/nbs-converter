@@ -3,6 +3,7 @@ import sys
 import numpy
 import mcschematic
 import os
+import random
 from constants import *
 
 
@@ -85,22 +86,19 @@ def newDisc(slot, note):
   if note >= 12:
     note -= 12
 
-  if note == -1:
-    note = 13
-
-  disc = NOTES_TO_DISCS_NAMED[note] if NAME_DISCS else NOTES_TO_DISCS_UNNAMED[note]
+  disc = NOTES_TO_DISCS_NAMED[note+1] if NAME_DISCS else NOTES_TO_DISCS_UNNAMED[note+1]
   return '{Count:1b,Slot:' + str(slot) + 'b,id:' + disc + '}'
 
 
+BOX = '"minecraft:shulker_box"'
 def createShulker(currentShulker, contents):
   slot = (currentShulker - 1) % 27
 
   # remove trailing comma
   contents = contents[:len(contents) - 1]
-  return '{Count:1b,Slot:' + str(
-    slot) + 'b,id:"minecraft:blue_shulker_box",tag:{BlockEntityTag:{CustomName:\'{"text":"' + str(
-    currentShulker) + '"}\',Items:[' + contents + '],id:"minecraft:shulker_box"},display:{Name:\'{"text":"' + str(
-    currentShulker) + '"}\'}}}'
+  customNamePart= 'CustomName:\'{{"text":"{currentShulker}"}}\',' if NAME_BOXES else ''
+
+  return f'{{Count:1b,Slot:{slot}b,id:{BOX},tag:{{BlockEntityTag:{{{customNamePart}Items:[{contents}],id:{BOX}}},display:{{Name:\'{{"text":"{currentShulker}"}}\'}}}}}}'
 
 
 def createChest(type_, contents):
@@ -169,7 +167,7 @@ def main():
   minimalChestContents = removeEmptyChests(allChestContents)
 
   # turn minimalChestContents into a schematic
-  schems = makeSchematics(songLengthAdjusted, minimalChestContents, separateInTwo)
+  schems = makeSchematics(songLengthAdjusted, minimalChestContents, separateInTwo, nameBoxes=True)
 
   for i, schem in enumerate(schems):
     saveName = DEFAULT_SCHEM_DIRECTORY + '/' + songName.lower().replace('(', '').replace(')', '').replace(' ', '_')
@@ -178,7 +176,10 @@ def main():
     schem.save('', saveName, mcschematic.Version.JE_1_20)
     print('Your schematic was successfully generated and saved under "' + saveName + '.schem"')
 
-def makeSchematics(songLengthAdjusted, minimalChestContents, separateInTwo = False):
+def makeSchematics(songLengthAdjusted, minimalChestContents, separateInTwo = False, coloredBoxes = True):
+    if coloredBoxes:
+      BOX = random.choice(COLORED_SHULKER_BOXES)
+
     schems = list()
     nSchems = 2 if separateInTwo else 1
     for i in range(nSchems):
