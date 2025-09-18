@@ -19,6 +19,11 @@ SURVIVAL_FARMABLE = True
 SEPARATE_EVEN_ODD = True
 
 # EDITABLE SETTING
+# Choose the color of the boxes. The options are defined in the dictionary COLORED_SHULKER_BOXES.
+# You can also leave it in None and it will take something at random
+BOX_COLOR = "yellow"
+
+# EDITABLE SETTING
 # The number of full modules (2 half-modules) of each instrument
 # in the physical machine. Can be set to 0 if the module does not exist.
 # NOTE: These settings are configured for the machine in the world download.
@@ -164,22 +169,22 @@ NOTES_TO_DISCS_SURVIVAL = [
 
 # DO NOT EDIT
 # List of colored shulker boxes 
-COLORED_SHULKER_BOXES = [
-  '"minecraft:black_shulker_box"',
-  '"minecraft:blue_shulker_box"',
-  '"minecraft:brown_shulker_box"',
-  '"minecraft:cyan_shulker_box"',
-  '"minecraft:gray_shulker_box"',
-  '"minecraft:green_shulker_box"',
-  '"minecraft:light_blue_shulker_box"',
-  '"minecraft:light_gray_shulker_box"',
-  '"minecraft:lime_shulker_box"',
-  '"minecraft:magenta_shulker_box"',
-  '"minecraft:orange_shulker_box"',
-  '"minecraft:pink_shulker_box"',
-  '"minecraft:purple_shulker_box"',
-  '"minecraft:red_shulker_box"',
-  '"minecraft:shulker_box"',
-  '"minecraft:white_shulker_box"',
-  '"minecraft:yellow_shulker_box"',
-]
+COLORED_SHULKER_BOXES = {
+  'shulker_box': '"minecraft:shulker_box"',
+  'white': '"minecraft:white_shulker_box"',
+  'light_gray': '"minecraft:light_gray_shulker_box"',
+  'gray': '"minecraft:gray_shulker_box"',
+  'black': '"minecraft:black_shulker_box"',
+  'brown': '"minecraft:brown_shulker_box"',
+  'red': '"minecraft:red_shulker_box"',
+  'orange': '"minecraft:orange_shulker_box"',
+  'yellow': '"minecraft:yellow_shulker_box"',
+  'lime': '"minecraft:lime_shulker_box"',
+  'green': '"minecraft:green_shulker_box"',
+  'cyan': '"minecraft:cyan_shulker_box"',
+  'light_blue': '"minecraft:light_blue_shulker_box"',
+  'blue': '"minecraft:blue_shulker_box"',
+  'purple': '"minecraft:purple_shulker_box"',
+  'magenta': '"minecraft:magenta_shulker_box"',
+  'pink': '"minecraft:pink_shulker_box"',
+}

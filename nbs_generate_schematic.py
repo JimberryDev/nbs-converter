@@ -177,10 +177,12 @@ def main():
     schem.save('', saveName, mcschematic.Version.JE_1_20)
     print('Your schematic was successfully generated and saved under "' + saveName + '.schem"')
 
-def makeSchematics(songLengthAdjusted, minimalChestContents, coloredBoxes = True):
-    if coloredBoxes:
-      global box
-      box = random.choice(COLORED_SHULKER_BOXES)
+def makeSchematics(songLengthAdjusted, minimalChestContents):
+    global box
+    if BOX_COLOR in COLORED_SHULKER_BOXES:
+      box = COLORED_SHULKER_BOXES[BOX_COLOR]
+    else:
+      box = random.choice(list(COLORED_SHULKER_BOXES.values()))
 
     schems = list()
     nSchems = 2 if SEPARATE_EVEN_ODD else 1
