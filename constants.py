@@ -14,6 +14,11 @@ NAME_BOXES = True
 SURVIVAL_FARMABLE = True
 
 # EDITABLE SETTING
+# Choose whether or not to separate the song into two schematics, having on one side the even ticks,
+# and on the other the odd ones, so you can have two music boxes playing at the same time, doubling the tempo
+SEPARATE_EVEN_ODD = True
+
+# EDITABLE SETTING
 # The number of full modules (2 half-modules) of each instrument
 # in the physical machine. Can be set to 0 if the module does not exist.
 # NOTE: These settings are configured for the machine in the world download.
@@ -157,6 +162,8 @@ NOTES_TO_DISCS_SURVIVAL = [
   '"minecraft:potion"',
 ]
 
+# DO NOT EDIT
+# List of colored shulker boxes 
 COLORED_SHULKER_BOXES = [
   '"minecraft:black_shulker_box"',
   '"minecraft:blue_shulker_box"',

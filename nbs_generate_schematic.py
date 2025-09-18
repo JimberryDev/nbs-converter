@@ -86,11 +86,18 @@ def newDisc(slot, note):
   if note >= 12:
     note -= 12
 
-  disc = NOTES_TO_DISCS_NAMED[note+1] if NAME_DISCS else NOTES_TO_DISCS_UNNAMED[note+1]
+  disc = None
+  if SURVIVAL_FARMABLE:
+    disc = NOTES_TO_DISCS_SURVIVAL[note+1]
+  elif NAME_DISCS:
+    disc = NOTES_TO_DISCS_NAMED[note+1]
+  else:
+    disc = NOTES_TO_DISCS_UNNAMED[note+1]
+    
   return '{Count:1b,Slot:' + str(slot) + 'b,id:' + disc + '}'
 
 
-BOX = '"minecraft:shulker_box"'
+box = '"minecraft:shulker_box"'
 def createShulker(currentShulker, contents):
   slot = (currentShulker - 1) % 27
 
@@ -98,7 +105,7 @@ def createShulker(currentShulker, contents):
   contents = contents[:len(contents) - 1]
   customNamePart= 'CustomName:\'{{"text":"{currentShulker}"}}\',' if NAME_BOXES else ''
 
-  return f'{{Count:1b,Slot:{slot}b,id:{BOX},tag:{{BlockEntityTag:{{{customNamePart}Items:[{contents}],id:{BOX}}},display:{{Name:\'{{"text":"{currentShulker}"}}\'}}}}}}'
+  return f'{{Count:1b,Slot:{slot}b,id:{box},tag:{{BlockEntityTag:{{{customNamePart}Items:[{contents}],id:{box}}},display:{{Name:\'{{"text":"{currentShulker}"}}\'}}}}}}'
 
 
 def createChest(type_, contents):
@@ -120,12 +127,6 @@ def main():
   songFile = input('Please enter the file name of your song (include the .nbs): ')
   if not songFile.endswith('.nbs'):
     sys.exit('Your song file must end with ".nbs".')
-
-  separateInTwo = input('Would you like to separate the odd and even ticks into two separate schematics? y/[n]\n') == 'y'
-  if separateInTwo: 
-    print('Separating then')
-  if not separateInTwo: 
-    print('Not separating then')
 
   try:
     song = pynbs.read(songFile)
@@ -167,21 +168,22 @@ def main():
   minimalChestContents = removeEmptyChests(allChestContents)
 
   # turn minimalChestContents into a schematic
-  schems = makeSchematics(songLengthAdjusted, minimalChestContents, separateInTwo, nameBoxes=True)
+  schems = makeSchematics(songLengthAdjusted, minimalChestContents)
 
   for i, schem in enumerate(schems):
     saveName = DEFAULT_SCHEM_DIRECTORY + '/' + songName.lower().replace('(', '').replace(')', '').replace(' ', '_')
-    if separateInTwo: saveName += '_' + str(i)
+    if SEPARATE_EVEN_ODD: saveName += '_' + str(i)
     os.makedirs(DEFAULT_SCHEM_DIRECTORY, exist_ok=True)
     schem.save('', saveName, mcschematic.Version.JE_1_20)
     print('Your schematic was successfully generated and saved under "' + saveName + '.schem"')
 
-def makeSchematics(songLengthAdjusted, minimalChestContents, separateInTwo = False, coloredBoxes = True):
+def makeSchematics(songLengthAdjusted, minimalChestContents, coloredBoxes = True):
     if coloredBoxes:
-      BOX = random.choice(COLORED_SHULKER_BOXES)
+      global box
+      box = random.choice(COLORED_SHULKER_BOXES)
 
     schems = list()
-    nSchems = 2 if separateInTwo else 1
+    nSchems = 2 if SEPARATE_EVEN_ODD else 1
     for i in range(nSchems):
       schem = mcschematic.MCSchematic()
       schems.append(schem)
